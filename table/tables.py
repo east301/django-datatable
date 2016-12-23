@@ -90,18 +90,18 @@ class TableDataMap(object):
 
     @classmethod
     def register(cls, token, queryset_generator, columns):
-        data = cache.get(self._get_cache_key(token))
+        data = cache.get(cls._get_cache_key(token))
         if not data:
-            cache.set(self._get_cache_key(token), [dill.dumps(queryset_generator), columns])
+            cache.set(cls._get_cache_key(token), [dill.dumps(queryset_generator), columns])
 
     @classmethod
     def get_queryset_generator(cls, token):
-        data = cache.get(self._get_cache_key(token))
+        data = cache.get(cls._get_cache_key(token))
         return dill.loads(data[0]) if data else None
 
     @classmethod
     def get_columns(cls, token):
-        data = cache.get(self._get_cache_key(token))
+        data = cache.get(cls._get_cache_key(token))
         return data[1] if data else None
 
     @classmethod
