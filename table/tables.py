@@ -96,11 +96,13 @@ class TableDataMap(object):
 
     @classmethod
     def get_queryset_generator(cls, token):
-        return cache.get(self._get_cache_key(token))[0]
+        data = cache.get(self._get_cache_key(token))
+        return dill.loads(data[0]) if data else None
 
     @classmethod
     def get_columns(cls, token):
-        return cache.get(self._get_cache_key(token))[1]
+        data = cache.get(self._get_cache_key(token))
+        return data[1] if data else None
 
     @classmethod
     def _get_cache_key(cls, token):
@@ -137,6 +139,7 @@ class TableWidgets(object):
 class TableOptions(object):
     def __init__(self, options=None):
         self.model = getattr(options, 'model', None)
+        self.queryset_generator = getattr(options, 'queryset_generator', None)
 
         # ajax option
         self.ajax = getattr(options, 'ajax', False)
