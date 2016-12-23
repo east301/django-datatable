@@ -53,10 +53,10 @@ class FeedDataView(JSONResponseMixin, BaseListView):
         return BaseListView.get(self, request, *args, **kwargs)
 
     def get_queryset(self):
-        model = TableDataMap.get_model(self.token)
-        if model is None:
+        queryset_generator = TableDataMap.get_queryset_generator(self.token)
+        if queryset_generator is None:
             return None
-        return model.objects.all()
+        return queryset_generator
 
     def filter_queryset(self, queryset):
         def get_filter_arguments(filter_target):

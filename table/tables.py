@@ -5,6 +5,7 @@ import copy
 from collections import OrderedDict
 from hashlib import md5
 
+import dill
 from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
@@ -86,16 +87,15 @@ class TableDataMap(object):
     A data map that represents relationship between Table instance and
     Model.
     """
-    map = {}
 
     @classmethod
-    def register(cls, token, model, columns):
+    def register(cls, token, queryset_generator, columns):
         data = cache.get(self._get_cache_key(token))
         if not data:
-            cache.set(self._get_cache_key(token), [model, columns])
+            cache.set(self._get_cache_key(token), [dill.dumps(queryset_generator), columns])
 
     @classmethod
-    def get_model(cls, token):
+    def get_queryset_generator(cls, token):
         return cache.get(self._get_cache_key(token))[0]
 
     @classmethod
@@ -237,7 +237,7 @@ class TableMetaClass(type):
         token = md5(name.encode('utf-8')).hexdigest()
 
         if opts.ajax:
-            TableDataMap.register(token, opts.model, copy.deepcopy(base_columns))
+            TableDataMap.register(token, opts.queryset_generator, copy.deepcopy(base_columns))
 
         attrs['token'] = token
         attrs['base_columns'] = base_columns
