@@ -5,6 +5,7 @@ import copy
 from collections import OrderedDict
 from hashlib import md5
 
+from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
 
@@ -89,16 +90,21 @@ class TableDataMap(object):
 
     @classmethod
     def register(cls, token, model, columns):
-        if token not in TableDataMap.map:
-            TableDataMap.map[token] = (model, columns)
+        data = cache.get(self._get_cache_key(token))
+        if not data:
+            cache.set(self._get_cache_key(token), [model, columns])
 
     @classmethod
     def get_model(cls, token):
-        return TableDataMap.map.get(token)[0]
+        return cache.get(self._get_cache_key(token))[0]
 
     @classmethod
     def get_columns(cls, token):
-        return TableDataMap.map.get(token)[1]
+        return cache.get(self._get_cache_key(token))[1]
+
+    @classmethod
+    def _get_cache_key(cls, token):
+        return 'django-datatable.table.{}'.format(token)
 
 
 class TableWidgets(object):
